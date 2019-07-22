@@ -1,0 +1,7 @@
+priv/*
+ebin/*
+deps/*
+aws_iot_client.d
+.erlang.mk/
+*.swo
+*.swp
