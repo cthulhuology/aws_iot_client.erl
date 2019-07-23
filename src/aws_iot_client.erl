@@ -6,6 +6,14 @@
 
 -behavior(gen_server).
 
+-record(resource, {
+    virtual_host,
+    %% exchange, queue, ...
+    kind,
+    %% name as a binary
+    name
+}).
+
 -record(exchange, {
           name, type, durable, auto_delete, internal, arguments, %% immutable
           scratches,       %% durable, explicitly updated via update_scratch/3
@@ -81,7 +89,7 @@ handle_info({ mqttc, _C, connected }, State) ->
 handle_info({ publish, Topic, Message }, State) ->
 	Exchange = proplists:get_value(exchange,State),
 	io:format("Publishing ~p -> ~p / ~p~n",[ Message, Topic, Exchange ]),
-	Res = rabbit_basic:publish(#exchange{ name = Exchange },Topic,[],Message),
+	Res = rabbit_basic:publish(#exchange{ name = #resource{ kind = exchange, name = Exchange, virtual_host = <<"/">> }},Topic,[],Message),
 	io:format("Publish result ~p~n", [ Res ]),
 	{ noreply, State };
 
