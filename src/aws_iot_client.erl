@@ -26,6 +26,7 @@ start_link() ->
 init([]) ->
 	Config = application:get_all_env(?MODULE),
 	io:format("Config is ~p~n", [ Config ]),
+	Certs = proplists:get_value(certsdir, Config),
 	Host = proplists:get_value(host, Config),
 	Port = proplists:get_value(port, Config),
 	ClientId = proplists:get_value(client_id, Config),
@@ -37,9 +38,9 @@ init([]) ->
 		{ port, Port },
 		{ client_id, ClientId },
 		{ ssl, [
-			{ certfile, code:priv_dir(?MODULE) ++ "/" ++ Cert },
-			{ keyfile, code:priv_dir(?MODULE) ++ "/" ++ Keyfile },
-			{ cacertfile, code:priv_dir(?MODULE) ++ "/" ++ CACert }
+			{ certfile, Certs ++ "/" ++ Cert },
+			{ keyfile, Certs ++ "/"  ++ Keyfile },
+			{ cacertfile,  Certs ++ "/" ++ CACert }
 		]}
 	]),
 	{ ok, [{ client, Client }, { config, Config }] }.

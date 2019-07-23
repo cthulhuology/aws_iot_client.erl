@@ -1,16 +1,9 @@
 {application, 'aws_iot_client', [
-	{description, "New project"},
+	{description, "AWS IoT Client application"},
 	{vsn, "0.1.0"},
 	{modules, ['aws_iot_client','aws_iot_client_app','aws_iot_client_sup']},
 	{registered, [aws_iot_client_sup]},
 	{applications, [kernel,stdlib,emqttc]},
 	{mod, {aws_iot_client_app, []}},
-	{env, [
-		{ host, "127.0.0.1" },
-		{ port, 8883 },
-		{ client_id, <<"device">> },
-		{ certfile, "device.crt" },
-		{ keyfile, "device.key" },
-		{ cacertfile, "root.ca.pem" }
-	]}
+	{env, []}
 ]}.
