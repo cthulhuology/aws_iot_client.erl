@@ -7,7 +7,7 @@
 -behavior(gen_server).
 
 -export([ subscribe/1, publish/2 ]).
--export([ init/1, start_link/0, handle_cast/2, handle_call/3, handle_info/2, terminate/2, code_change/3 ]).
+-export([ init/1, start_link/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2, code_change/3 ]).
 
 %%-----------------------------------------------------------------------------
 
@@ -20,10 +20,10 @@ publish(Topic,Message) ->
 
 %%-----------------------------------------------------------------------------
 
-start_link() ->
-	gen_server:start_link( { local, ?MODULE }, ?MODULE, [], [] ).
+start_link(Publisher) ->
+	gen_server:start_link( { local, ?MODULE }, ?MODULE, [Publisher], [] ).
 
-init([]) ->
+init([Publisher]) ->
 	Config = application:get_all_env(?MODULE),
 	io:format("Config is ~p~n", [ Config ]),
 	Certs = proplists:get_value(certsdir, Config),
@@ -41,13 +41,15 @@ init([]) ->
 			{ certfile, Certs ++ "/" ++ Cert },
 			{ keyfile, Certs ++ "/"  ++ Keyfile },
 			{ cacertfile,  Certs ++ "/" ++ CACert }
-		]}
+		]},
+		{ auto_resub, true },
+		{ reconnect, 0 }
 	]),
-	{ ok, [{ client, Client }, { config, Config }] }.
+	{ ok, [{ client, Client }, { config, Config }, { publisher, Publisher }] }.
 
 handle_cast({ subscribe, Topic }, State) ->
 	Client = proplists:get_value(client, State),
-	{ ok, _ } = emqttc:sync_subscribe(Client,Topic,qos0),
+	ok = emqttc:subscribe(Client,Topic,qos0),
 	{ noreply, State };
 
 handle_cast({ publish, Topic, Message }, State) ->
@@ -66,6 +68,12 @@ handle_call(Message, _From, State) ->
 handle_info({ mqttc, _C, connected }, State) ->
 	io:format("Connected~n"),
 	{ noreply,  State };
+
+handle_info({ publish, Topic, Message }, State) ->
+	Publisher = proplists:get_value(publisher,State),
+	io:format("Publishing ~p -> ~p / ~p~n",[ Message, Topic, Publisher ]),
+	Publisher:publish(Topic,Message),
+	{ noreply, State };
 
 handle_info(Message,State) ->
 	io:format("Info Msg: ~p~n", [ Message ]),
