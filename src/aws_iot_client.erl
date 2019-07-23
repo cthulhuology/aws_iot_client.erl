@@ -6,22 +6,6 @@
 
 -behavior(gen_server).
 
--record(resource, {
-    virtual_host,
-    %% exchange, queue, ...
-    kind,
-    %% name as a binary
-    name
-}).
-
--record(exchange, {
-          name, type, durable, auto_delete, internal, arguments, %% immutable
-          scratches,       %% durable, explicitly updated via update_scratch/3
-          policy,          %% durable, implicitly updated when policy changes
-          operator_policy, %% durable, implicitly updated when policy changes
-          decorators,
-          options = #{}}).    %% transient, recalculated in store/1 (i.e. recovery)
-
 -export([ subscribe/1, publish/2 ]).
 -export([ init/1, start_link/0, handle_cast/2, handle_call/3, handle_info/2, terminate/2, code_change/3 ]).
 
@@ -89,7 +73,7 @@ handle_info({ mqttc, _C, connected }, State) ->
 handle_info({ publish, Topic, Message }, State) ->
 	Exchange = proplists:get_value(exchange,State),
 	io:format("Publishing ~p -> ~p / ~p~n",[ Message, Topic, Exchange ]),
-	Res = rabbit_basic:publish(#exchange{ name = #resource{ kind = exchange, name = Exchange, virtual_host = <<"/">> }},Topic,[],Message),
+	Res = rabbit_basic:publish(<<"aws">>,Topic,[],Message),
 	io:format("Publish result ~p~n", [ Res ]),
 	{ noreply, State };
 
