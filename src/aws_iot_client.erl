@@ -34,6 +34,8 @@ init([]) ->
 	Keyfile = proplists:get_value(keyfile, Config),
 	CACert = proplists:get_value(cacertfile, Config),
 	Exchange = proplists:get_value(exchange, Config),
+	Resource = proplists:get_value(resource, Config),
+	Publisher = proplists:get_value(publisher, Config),
 	{ ok, Client } = emqttc:start_link([
 		{ host, Host },
 		{ port, Port },
@@ -46,7 +48,12 @@ init([]) ->
 		{ auto_resub, true },
 		{ reconnect, 0 }
 	]),
-	{ ok, [{ client, Client }, { config, Config }, { exchange, Exchange }] }.
+	{ ok, [ { client, Client }, 
+		{ config, Config }, 
+		{ resource, Resource },
+		{ exchange, Exchange },
+		{ publihser, Publisher }
+		]}.
 
 handle_cast({ subscribe, Topic }, State) ->
 	Client = proplists:get_value(client, State),
