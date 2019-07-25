@@ -52,7 +52,7 @@ init([]) ->
 		{ config, Config }, 
 		{ resource, Resource },
 		{ exchange, Exchange },
-		{ publihser, Publisher }
+		{ publisher, Publisher }
 		]}.
 
 handle_cast({ subscribe, Topic }, State) ->
