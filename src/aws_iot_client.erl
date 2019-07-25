@@ -71,9 +71,11 @@ handle_info({ mqttc, _C, connected }, State) ->
 	{ noreply,  State };
 
 handle_info({ publish, Topic, Message }, State) ->
+	Publisher = proplists:get_value(publisher,State),
+	Resource = proplists:get_value(resource,State),
 	Exchange = proplists:get_value(exchange,State),
-	io:format("Publishing ~p -> ~p / ~p~n",[ Message, Topic, Exchange ]),
-	Res = rabbit_basic:publish(<<"aws">>,Topic,[],Message),
+	io:format("Publishing ~p ~p -> ~p ~p ~p~n",[ Publisher, Message, Topic, Resource, Exchange ]),
+	Res = Publisher:publish(Resource, Exchange, Topic, Message),
 	io:format("Publish result ~p~n", [ Res ]),
 	{ noreply, State };
 
